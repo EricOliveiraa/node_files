@@ -1,0 +1,84 @@
+# Nestify
+   Vai ajudar a gente a criar a nossa API
+   Vai dar subsídios para ficar ouvindo requisições HTTP e processando essas aquisições 
+   e efetuando/dando as respostas.
+
+   3 Ações:
+    1. Criar servidor
+    2. Config Rotas/Url's
+    3. E qual porta iremos ouvir.
+  
+  !Restify é muito similar ao Express.js!
+
+  Diferença entre:
+    Ele já tem realmente uma implementação focada em APIs.
+      Já trabalha com JSON por default
+      O tratamento também é mais direcionado para API's Rest
+
+
+# Methods: Req, Res, Next passados na callback
+  Res: serve para enviar uma resposta para o cliente.
+    Faz 2 ações por baixo dos panos:
+      res.ContentType = 'application/json'
+      res.send({msd: 'hello'})
+    Quando estamos setando ContentType, estamos setando Header.
+    Outra forma que podemos fazer para setar header:
+      res.setHeader('Content-Type', 'application/json'  )
+    Pegando Status
+      res.status(number)
+    
+
+   Req: serve para realizar ações que ocorrem dentro de requisições feitas
+    geralmente fica entre cliente e a resposta do servidor.
+      Podem realizar essas funções...
+        browser: req.userAgent,
+        method: req.method,
+        url: req.href(),
+        path: req.path(),
+        body: req.body(),
+        params: req.params,
+        query: req.query,
+
+    Next: Função que podemos chamar em 3 situações:
+      1. Quando queremos indicar para o restify que a nossa callback terminou de fazer
+      o que ela tem de fazer!
+      2. Quando você tem mais de uma callback associada com o mesmo caminho, mesmo path de rotas.
+        Se eu não quiser para que passe para a callback seguinte, chamo Next passando o (false).
+      3. Quando eu quero passar um objeto de error. Ou seja, quando quero parar o processamento de
+      request e eu passo um objeto de erro.
+
+      server.get("/next", [
+        (req, res, next) => {
+        if (req.userAgent() && req.userAgent().includes("MSIE 7.0")) {
+        res.status(400);
+        res.json({ msg: "atualize seu brwoser" });
+        return next(false);
+
+        turn next();
+        },
+        (req, res, next) => {
+        let error: any = new Error();
+        error.statusCode = 400;
+        error.message = "atualize seu browser";
+        return next(error);
+        },
+        (req, res, next) => {
+        res.json({ message: "Hello" });
+        return next();
+        },
+        ]);
+
+        # Code Response
+          200 - ok
+          201 - ok e recurso foi criado
+          202 - entende a requisição, mas não terminou de processar (async)
+          204 - não se tem conteúdo retornado no corpo da resposta
+
+          Status de Error
+          30x - Redirecionamento de conteúdo
+          40x - Erros de aplicação cliente. Erro na requisição;
+            400 - bad request
+            401 - não autorizado
+            403 - proibido
+            404 - não encontrado
+          50x - Erro interno, erro no servidor.
